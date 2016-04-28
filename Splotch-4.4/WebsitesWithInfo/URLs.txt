@@ -1,0 +1,7 @@
+URLs:
+http://arxiv.org/pdf/1004.1302v1.pdf
+
+https://www.researchgate.net/publication/258265490_CUDA-Splotch_GPU_Visualization_of_Astrophysical_Data
+
+http://arxiv.org/pdf/1010.6128v1.pdf
+

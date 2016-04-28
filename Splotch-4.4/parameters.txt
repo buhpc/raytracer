@@ -1,0 +1,223 @@
+Parameters read by Splotch
+==========================
+
+infile (string):
+  name of the input file containing particle data
+  (in case of parallel reading and/or interpolation this is only a partial name)
+
+simtype (integer):
+  type of the data reader to be used
+
+    0: tabular binary file
+    1: block binary file
+    2: Gadget2
+    3: Enzo
+    4: Gadget Millenium
+    5: plain binary file MPI2
+    6: Mesh
+    7: HDF5
+
+if (simtype==2 or simtype==4) (i.e. only for Gadget files)
+
+  interpolation_mode (integer, default=0):
+    Only relevant for animations
+    0: no interpolation between files
+    1: linear interpolation
+    2: higher order interpolation
+
+  ptypes (integer):
+    number of different particle types (default: 1)
+
+  numfiles (integer, default=1):
+    number of files containing one data set
+
+  readparallel (integer, default=1):
+    number of tasks reading the input data set.
+    numfiles must be a multiple of readparallel
+
+  if (interpolation_mode>0)
+
+    id_label (string):
+      label for the block containing the particle IDs
+
+  endif
+
+  ptype<n> (integer, n=[0..ptypes-1]):
+    Gadget type of the nth kind of particles to render
+
+  size_fix<n> (float, n=[0..ptypes-1], default=0):
+    if >0, use this value as radius for particles of kind n
+
+  if (size_fix<n> == 0)
+    size_label<n> (string):
+      name os the quantity to use for particle size (HSML is a good choice)
+    size_present<n> (integer):
+      bit-coded 2^ptype for which types this block contains data
+  endif
+
+  size_fac<n> (float, default=1):
+    factor applied to particle sizes
+
+  color_is_vector<n> (bool, default=false):
+    indicates if color is a vector or a scalar quantity
+  color_label<n> (string, default="XXXX"):
+    label for block that contains particle color
+  color_present<n> (integer):
+    bit-coded 2^ptype for which types this block contains data
+  color_fac<n> = (float, default=1):
+    factor to multiply color with
+
+  intensity_label<n> = (string, default="XXXX"):
+    label for block that contains particle intensity
+  intensity_present<n> (integer):
+    bit-coded 2^ptype for which types this block contains data
+
+endif
+
+swap_endian (bool, defaul=false):
+  if true, values read from binary input files are byte-swapped directly
+  after reading
+
+
+if (simtype==0,1,5) (i.e. only for binary files)
+
+  num_columns (integer):
+    number of columns (case simtype = 0, i.e. tabular)
+  num_blocks (integer):
+    number of blocks  (case simtype = 0/5, i.e. blocks)
+
+## number of column/block containing the following particle property:
+## (-1 means that this property is missing in the input file or it is not to be read)
+    x (integer): index of the x-coordinate
+    y (integer): index of the y-coordinate
+    z (integer): index of the z-coordinate
+    r (integer): index of the smoothing length
+    I (integer): index of the intensity
+## if color_is_vector, the following properties correspond to RGB color of the particle
+    C1 (integer): index of the R component
+    C2 (integer): index of the G component
+    C3 (integer): index of the B component
+##else
+    C1 (integer): index of the quantity to use in a color lookup table
+
+endif
+
+
+##------------------
+## Geometrical setup
+##------------------
+minrad_pix (float, default=1):
+  minimum radius (in pixels) that a particle can have; smaller particles are
+  automatically enlarged
+projection (bool, default=true):
+  enables perspective projection
+
+geometry_file (string, default=""):
+  name of the geometry file, if any
+
+if (geometry_file!="")
+
+  geometry_start (integer, default=0):
+    first line in the geometry file that should be used
+
+  geometry_incr (integer, default=1):
+    distance of two consecutive lines to be used
+
+else
+
+  camera_{xyz} (double):
+    X/Y/Z-coordinate of the camera
+
+  lookat_{xyz} (double):
+    X/Y/Z-coordinate of the look-at point
+
+  sky_{xyz} (double):
+    X/Y/Z-coordinate of the sky vector
+
+endif
+
+fov (double, default=45):
+  horizontal field of view in degrees
+
+EyeSeparation (double, default=0):
+  horizontal eye separation in degree. If set, turns on stereo mode
+
+## define z-coordinate range of particles to be visualized
+zmin (double, default=0):
+  near cutoff distance
+zmax (double, default=1e23):
+  far cutoff distance
+
+
+##-------------------------
+## Visualization properties
+##-------------------------
+a_eq_e (bool, default=true):
+  condition A = E in the radiative transfer equation
+
+sort_type (integer, default=0):
+  0: nosort, 1: by z, 2: by value, 3: by reversed value, 4: by size
+  (sorting only makes a difference if a_eq_t==false)
+
+## visualization properties for particles of type <n> :
+color_log<n> (bool, default=true):
+  if true, apply the log10() function to the physical quantity
+  associated to the color
+color_asinh<n> (bool, default=false):
+  apply hyperbolic arcsine function to the physical quantity
+  associated to the color
+color_min<n> (float, optional):
+  if provided, use this as lower limit for the color values (after application
+  of logarithm and/or asinh)
+color_max<n> (float, optional):
+  if provided, use this as upper limit for the color values (after application
+  of logarithm and/or asinh)
+intensity_log<n> (bool, default=true):
+  if true, apply the log10 function to the intensity value
+intensity_min<n> (float, optional):
+  if provided, use this as lower limit for the intensity values (after
+  application of the logarithm)
+intensity_max<n> (float, optional):
+  if provided, use this as upper limit for the intensity values (after
+  application of the logarithm)
+brightness<n> (float, default=1):
+  multiplicative factor of the intensity
+palette<n> (string):
+  name of the file containing the colormap
+  only used if color_is_vector<n> == false
+
+##---------------
+## Output Options
+##---------------
+pictype (integer, default=0):
+  format of the output image: 0 = TGA (uncompressed)
+                              1 = ASCII PPM (very large)
+                              2 = binary PPM
+                              3 = TGA (run length encoded)
+
+outfile (string):
+  output file name (partial name if multiple outputs are written)
+colorbar (bool, default=false):
+  if true, add a colorbar
+xres (integer, default=800):
+  number of image pixels in x direction
+yres (integer, default=xres):
+  number of image pixels in y direction
+
+##-----------
+## CUDA SETUP
+##-----------
+max_region =     ## the maximum pixels used to visualize a particle (default: 1024), if the particle
+                    occupies a larger region then split (split strategy optimization for access
+                    of the device memory)
+gpu_info =       ## if true, print detailed information about GPUs (default: false)
+
+gpu_number =     ## number of GPUs to use (Windows only)  (default: 1)
+
+use_host_as_thread =   ## enable host (cpu) as a cuda thread: true/false (default: false)
+host_load =            ## percentage of load for host (default 0) if it is enabled as a thread
+
+test_load_balancing =  ## enable gpu load balancing: true/false
+                          (default: false, i.e. all gpus manage the same number of particles)
+gpu_load<g> =          ## if test_load_balancing is true, this parameter gives the percentage
+                          of particles to manage for the gpu number <g>  (default: 0)
